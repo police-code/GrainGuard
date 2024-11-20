@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="simulation.css"> <!-- Link to your CSS file -->
+    <title>AI Simulation - GrainGuard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+        }
+
+        .scan-image {
+            margin: 20px auto;
+            max-width: 300px;
+            height: auto;
+        }
+
+        .results {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            font-size: 1.8em;
+            color: #555;
+        }
+
+        .results p {
+            font-size: 1.2em;
+            color: #777;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Simulation Result</h1>
+        <img src="grain-placeholder.jpg" alt="Scanned Grain Image" class="scan-image"> <!-- Placeholder image -->
+        <div class="results">
+            <h2>Analysis Summary</h2>
+            <p><strong>Moisture Level:</strong> 12.5% (Optimal)</p>
+            <p><strong>Weevil Activity:</strong> None Detected</p>
+            <p><strong>Grain Quality:</strong> Excellent</p>
+        </div>
+        <a href="dashboard.html" class="btn">Back to Dashboard</a>
+    </div>
+</body>
+</html>
