@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css"> <!-- Link to your CSS file -->
+    <title>Dashboard - GrainGuard</title>
+    <style>
+        .camera-preview {
+            width: 100%;
+            height: auto;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>GrainGuard Dashboard</h2>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Scan History</a></li>
+                <li><a href="#">Alerts</a></li>
+                <li><a href="#">Post-Harvest Handling Tips</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1 id="welcome-message">Welcome, [Shaibu]</h1> <!-- Placeholder for User's Name -->
+            <div class="scan-option">
+                <button class="btn scan-btn" id="scan-button">Scan Now</button>
+            </div>
+
+            <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
+            <div id="result" class="result"></div>
+
+            <div class="grid"> <!-- Added grid wrapper -->
+                <div class="card">
+                    <h3>Recent Scans</h3>
+                    <p>Here you can find your most recent grain scans.</p>
+                    <button class="btn">View Scans</button>
+                </div>
+                <div class="card">
+                    <h3>Alerts</h3>
+                    <p>No alerts at this time. Keep your grains safe!</p>
+                    <button class="btn">Check Alerts</button>
+                </div>
+                <div class="card">
+                    <h3>Statistics</h3>
+                    <p>Your grain health and moisture levels over time.</p>
+                    <button class="btn">View Statistics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 GrainGuard. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Example JavaScript to set the user's name
+        const userName = "Shaibu"; // Replace this with dynamic user data as needed
+        document.getElementById('welcome-message').textContent = `Welcome, ${userName}`;
+
+        // Accessing the scan button and camera preview elements
+        const scanButton = document.getElementById('scan-button');
+        const cameraPreview = document.getElementById('camera-preview');
+        const resultDiv = document.getElementById('result');
+
+        // Camera functionality
+        scanButton.addEventListener('click', async () => {
+            try {
+                // Request camera access
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = "block"; // Show camera preview
+                resultDiv.textContent = ""; // Clear previous results
+            } catch (err) {
+                alert("Unable to access camera: " + err.message);
+                console.error(err);
+            }
+        });
+
+        // Simulate AI Result after 5 seconds of scanning
+        cameraPreview.addEventListener('loadeddata', () => {
+            setTimeout(() => {
+                cameraPreview.style.display = "none"; // Hide the camera preview
+                resultDiv.innerHTML = `
+                    <p><strong>Scan Complete</strong></p>
+                    <p>AI Results: Grain is healthy, no weevils detected.</p>
+                `;
+            }, 5000); // Simulate a 5-second scan
+        });
+    </script>
+</body>
+</html>
