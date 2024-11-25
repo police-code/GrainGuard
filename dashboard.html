@@ -83,20 +83,25 @@
        // Camera functionality
 scanButton.addEventListener('click', async () => {
     try {
-        // Request access to the back camera (device camera with facing mode "environment")
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { exact: "environment" } }  // Requesting the back camera
+            video: { facingMode: "environment" }
         });
-        
         cameraPreview.srcObject = stream;
-        cameraPreview.style.display = "block"; // Show camera preview
-        resultDiv.textContent = ""; // Clear previous results
+        cameraPreview.style.display = "block";
+        resultDiv.textContent = "";
     } catch (err) {
-        alert("Unable to access camera: " + err.message);
-        console.error(err);
+        console.warn("Environment camera not accessible. Trying default camera.");
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true // Use the default camera as a fallback
+            });
+            cameraPreview.srcObject = stream;
+        } catch (innerErr) {
+            alert("Unable to access camera: " + innerErr.message);
+            console.error(innerErr);
+        }
     }
 });
-
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
