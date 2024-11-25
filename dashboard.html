@@ -81,27 +81,49 @@
         const resultDiv = document.getElementById('result');
 
        // Camera functionality
-scanButton.addEventListener('click', async () => {
+let currentStream;
+let currentDeviceId = null; // To store the current camera's deviceId
+
+// Function to start the camera
+async function startCamera(facingMode = 'user') {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
-        });
+        const constraints = {
+            video: { facingMode: { exact: facingMode } }
+        };
+        
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraPreview.srcObject = stream;
-        cameraPreview.style.display = "block";
-        resultDiv.textContent = "";
+        currentStream = stream;
+        
+        // Store the deviceId for future switching
+        const track = stream.getVideoTracks()[0];
+        currentDeviceId = track.getSettings().deviceId;
+        
+        cameraPreview.style.display = "block"; // Show camera preview
+        resultDiv.textContent = ""; // Clear previous results
     } catch (err) {
-        console.warn("Environment camera not accessible. Trying default camera.");
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true // Use the default camera as a fallback
-            });
-            cameraPreview.srcObject = stream;
-        } catch (innerErr) {
-            alert("Unable to access camera: " + innerErr.message);
-            console.error(innerErr);
-        }
+        alert("Unable to access camera: " + err.message);
+        console.error(err);
     }
-});
+}
+
+// Function to switch cameras
+async function switchCamera() {
+    if (currentStream) {
+        // Stop the current stream's video track
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+
+    const newFacingMode = currentDeviceId === "front" ? "environment" : "user"; // Toggle between front and back
+    await startCamera(newFacingMode);
+}
+
+// Call startCamera with "user" to start the front camera
+startCamera('user');
+
+// Add an event listener to switch cameras when the button is clicked
+document.getElementById('switchButton').addEventListener('click', switchCamera);
+
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
