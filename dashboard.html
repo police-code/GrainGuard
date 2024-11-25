@@ -81,49 +81,22 @@
         const resultDiv = document.getElementById('result');
 
        // Camera functionality
-let currentStream;
-let currentDeviceId = null; // To store the current camera's deviceId
-
-// Function to start the camera
-async function startCamera(facingMode = 'user') {
+// Camera functionality
+scanButton.addEventListener('click', async () => {
     try {
-        const constraints = {
-            video: { facingMode: { exact: facingMode } }
-        };
+        // Request access to the back camera (device camera with facing mode "environment")
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: "environment" } }  // Requesting the back camera
+        });
         
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraPreview.srcObject = stream;
-        currentStream = stream;
-        
-        // Store the deviceId for future switching
-        const track = stream.getVideoTracks()[0];
-        currentDeviceId = track.getSettings().deviceId;
-        
         cameraPreview.style.display = "block"; // Show camera preview
         resultDiv.textContent = ""; // Clear previous results
     } catch (err) {
         alert("Unable to access camera: " + err.message);
         console.error(err);
     }
-}
-
-// Function to switch cameras
-async function switchCamera() {
-    if (currentStream) {
-        // Stop the current stream's video track
-        currentStream.getTracks().forEach(track => track.stop());
-    }
-
-    const newFacingMode = currentDeviceId === "front" ? "environment" : "user"; // Toggle between front and back
-    await startCamera(newFacingMode);
-}
-
-// Call startCamera with "user" to start the front camera
-startCamera('user');
-
-// Add an event listener to switch cameras when the button is clicked
-document.getElementById('switchButton').addEventListener('click', switchCamera);
-
+});
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
