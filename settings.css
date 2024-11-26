@@ -3,7 +3,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Roboto', sans-serif;
-    background: #f4f4f9;
+    background: #eaf8ec; /* Light green background */
     color: #333;
     display: flex;
     justify-content: center;
@@ -27,7 +27,7 @@ body {
 header h1 {
     font-size: 28px;
     margin-bottom: 5px;
-    color: #27ae60;
+    color: #2e7d32; /* Dark green for the title */
 }
 
 header p {
@@ -46,18 +46,18 @@ header p {
     padding: 15px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    background: #f9f9f9;
+    background: #f1f8e9; /* Light green box background */
 }
 
 .setting-item h2 {
     font-size: 18px;
     margin-bottom: 8px;
-    color: #333;
+    color: #388e3c; /* Medium green for subheadings */
 }
 
 .setting-item p {
     font-size: 14px;
-    color: #777;
+    color: #555;
 }
 
 .setting-item button {
@@ -65,7 +65,7 @@ header p {
     padding: 10px 15px;
     font-size: 14px;
     color: white;
-    background-color: #007bff;
+    background-color: #4caf50; /* Primary green button */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -73,7 +73,7 @@ header p {
 }
 
 .setting-item button:hover {
-    background-color: #0056b3;
+    background-color: #388e3c; /* Darker green on hover */
     transform: translateY(-2px);
 }
 
@@ -86,13 +86,13 @@ header p {
     font-weight: bold;
     text-decoration: none;
     color: #ffffff;
-    background: #6c757d;
+    background: #66bb6a; /* Green back button */
     border-radius: 5px;
     transition: background 0.3s, transform 0.2s;
 }
 
 .back-button:hover {
-    background: #495057;
+    background: #388e3c; /* Dark green hover */
     transform: translateY(-2px);
 }
 
