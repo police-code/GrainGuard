@@ -12,6 +12,7 @@
             display: none;
             margin-top: 20px;
         }
+
         .result {
             margin-top: 20px;
             font-size: 1.2em;
@@ -38,14 +39,14 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <h1 id="welcome-message">Welcome</h1> <!-- Placeholder for User's Name -->
+            <h1 id="welcome-message">Welcome, [Shaibu]</h1> <!-- Placeholder for User's Name -->
             <div class="scan-option">
                 <button class="btn scan-btn" id="scan-button">Scan Now</button>
             </div>
-            
+
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
-            
+
             <div class="grid"> <!-- Added grid wrapper -->
                 <div class="card">
                     <h3>Recent Scans</h3>
@@ -72,16 +73,15 @@
 
     <script>
         // Example JavaScript to set the user's name
-        const userName = ; // Replace this with dynamic user data as needed
-        document.getElementById('welcome-message').textContent = `Welcome ${userName}`;
+        const userName = "Shaibu"; // Replace this with dynamic user data as needed
+        document.getElementById('welcome-message').textContent = `Welcome, ${userName}`;
 
         // Accessing the scan button and camera preview elements
         const scanButton = document.getElementById('scan-button');
         const cameraPreview = document.getElementById('camera-preview');
         const resultDiv = document.getElementById('result');
 
-       
-// Camera functionality
+      // Camera functionality
 scanButton.addEventListener('click', async () => {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
