@@ -1,9 +1,9 @@
-/* Body styling */
+/* General body styling */
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9; /* Light gray background */
+    font-family: 'Roboto', sans-serif;
+    background: #f9fafb; /* Soft gray background */
     color: #333;
     display: flex;
     justify-content: center;
@@ -13,42 +13,89 @@ body {
 
 /* Container styling */
 .container {
-    text-align: center;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px 30px;
     width: 90%;
+    max-width: 500px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
 }
 
-/* Heading styling */
-h1 {
-    font-size: 24px;
+/* Header styling */
+header h1 {
+    font-size: 28px;
     margin-bottom: 10px;
-    color: #4CAF50; /* Green to match the theme */
+    color: #4caf50; /* Green theme */
 }
 
-/* Empty message styling */
-.empty-message {
+header p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* History section */
+.history-section {
+    margin-top: 20px;
+}
+
+.no-records {
+    background: #f1f8e9; /* Light green background */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dcedc8;
+}
+
+.no-records p {
     font-size: 16px;
     color: #777;
-    margin: 15px 0;
+    margin-bottom: 15px;
+}
+
+.scan-button {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    background-color: #4caf50;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.scan-button:hover {
+    background-color: #388e3c; /* Darker green on hover */
+    transform: translateY(-2px);
 }
 
 /* Back button styling */
-.back-button {
+footer .back-button {
     display: inline-block;
     margin-top: 20px;
     padding: 10px 20px;
-    text-decoration: none;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 5px;
     font-size: 14px;
     font-weight: bold;
+    text-decoration: none;
+    color: #ffffff;
+    background: #66bb6a; /* Green back button */
+    border-radius: 5px;
+    transition: background 0.3s, transform 0.2s;
 }
 
-.back-button:hover {
-    background-color: #45a049; /* Slightly darker green for hover effect */
+footer .back-button:hover {
+    background: #388e3c; /* Dark green hover */
+    transform: translateY(-2px);
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
