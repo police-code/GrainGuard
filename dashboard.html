@@ -12,7 +12,6 @@
             display: none;
             margin-top: 20px;
         }
-
         .result {
             margin-top: 20px;
             font-size: 1.2em;
@@ -43,8 +42,10 @@
             <div class="scan-option">
                 <button class="btn scan-btn" id="scan-button">Scan Now</button>
             </div>
+            
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
+            
             <div class="grid"> <!-- Added grid wrapper -->
                 <div class="card">
                     <h3>Recent Scans</h3>
@@ -83,7 +84,8 @@
 // Camera functionality
 scanButton.addEventListener('click', async () => {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia
+            ({
             video: {
                 facingMode: "environment"
             }
