@@ -1,0 +1,84 @@
+/* General body styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #f9fafb; /* Light background */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container styling */
+.container {
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px 30px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Header styling */
+header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #4caf50; /* Green to match theme */
+}
+
+header p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Alerts section */
+.alerts-section {
+    margin-top: 20px;
+}
+
+.no-alerts {
+    background: #f1f8e9; /* Light green background */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dcedc8;
+}
+
+.no-alerts p {
+    font-size: 16px;
+    color: #777;
+}
+
+/* Back button styling */
+footer .back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #ffffff;
+    background: #66bb6a; /* Green back button */
+    border-radius: 5px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+footer .back-button:hover {
+    background: #388e3c; /* Dark green hover */
+    transform: translateY(-2px);
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
