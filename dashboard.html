@@ -79,23 +79,23 @@
         const cameraPreview = document.getElementById('camera-preview');
         const resultDiv = document.getElementById('result');
 
-       // Camera functionality
+       
 // Camera functionality
 scanButton.addEventListener('click', async () => {
     try {
-        // Request access to the back camera (device camera with facing mode "environment")
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { exact: "environment" } }  // Requesting the back camera
+            video: {
+                facingMode: "environment"
+            }
         });
-        
         cameraPreview.srcObject = stream;
-        cameraPreview.style.display = "block"; // Show camera preview
-        resultDiv.textContent = ""; // Clear previous results
+        cameraPreview.style.display = "block";
     } catch (err) {
-        alert("Unable to access camera: " + err.message);
+        alert("Unable to access the camera: " + err.message);
         console.error(err);
     }
 });
+
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
