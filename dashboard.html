@@ -39,7 +39,7 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <h1 id="welcome-message">Welcome</h1> <!-- Placeholder for User's Name -->
+            <h1 id="welcome-message">Welcome, [Shaibu]</h1> <!-- Placeholder for User's Name -->
             <div class="scan-option">
                 <button class="btn scan-btn" id="scan-button">Scan Now</button>
             </div>
@@ -73,29 +73,30 @@
 
     <script>
         // Example JavaScript to set the user's name
-        document.getElementById('welcome-message').textContent = `Welcome,
+        const userName = "Shaibu"; // Replace this with dynamic user data as needed
+        document.getElementById('welcome-message').textContent = `Welcome, ${userName}`;
 
         // Accessing the scan button and camera preview elements
         const scanButton = document.getElementById('scan-button');
         const cameraPreview = document.getElementById('camera-preview');
         const resultDiv = document.getElementById('result');
 
-       // Camera functionality
-    scanButton.addEventListener('click', async () => {
-        try {
-            // Request access to the back camera
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { exact: "environment" } } // Requesting the back camera
-            });
-            
-            cameraPreview.srcObject = stream;
-            cameraPreview.style.display = "block"; // Show camera preview
-            resultDiv.textContent = ""; // Clear previous results
-        } catch (err) {
-            alert("Unable to access camera: " + err.message);
-            console.error(err);
-        }
-    });
+      // Camera functionality
+scanButton.addEventListener('click', async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment"
+            }
+        });
+        cameraPreview.srcObject = stream;
+        cameraPreview.style.display = "block";
+    } catch (err) {
+        alert("Unable to access the camera: " + err.message);
+        console.error(err);
+    }
+});
+
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
