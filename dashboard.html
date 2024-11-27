@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="dashboard.css">
     <title>Dashboard - GrainGuard</title>
     <style>
         .camera-preview {
@@ -39,7 +39,7 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <h1 id="welcome-message">Welcome, [Shaibu]</h1> <!-- Placeholder for User's Name -->
+            <h1 id="welcome-message">Welcome</h1> <!-- Static welcome message -->
             <div class="scan-option">
                 <button class="btn scan-btn" id="scan-button">Scan Now</button>
             </div>
@@ -47,7 +47,7 @@
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
 
-            <div class="grid"> <!-- Added grid wrapper -->
+            <div class="grid">
                 <div class="card">
                     <h3>Recent Scans</h3>
                     <p>Here you can find your most recent grain scans.</p>
@@ -72,31 +72,26 @@
     </footer>
 
     <script>
-        // Example JavaScript to set the user's name
-        const userName = "Shaibu"; // Replace this with dynamic user data as needed
-        document.getElementById('welcome-message').textContent = `Welcome, ${userName}`;
-
         // Accessing the scan button and camera preview elements
         const scanButton = document.getElementById('scan-button');
         const cameraPreview = document.getElementById('camera-preview');
         const resultDiv = document.getElementById('result');
 
-      // Camera functionality
-scanButton.addEventListener('click', async () => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "environment"
+        // Camera functionality
+        scanButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "environment"
+                    }
+                });
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = "block";
+            } catch (err) {
+                alert("Unable to access the camera: " + err.message);
+                console.error(err);
             }
         });
-        cameraPreview.srcObject = stream;
-        cameraPreview.style.display = "block";
-    } catch (err) {
-        alert("Unable to access the camera: " + err.message);
-        console.error(err);
-    }
-});
-
 
         // Simulate AI Result after 5 seconds of scanning
         cameraPreview.addEventListener('loadeddata', () => {
