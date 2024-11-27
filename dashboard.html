@@ -93,16 +93,6 @@
             }
         });
 
-        // Simulate AI Result after 5 seconds of scanning
-        cameraPreview.addEventListener('loadeddata', () => {
-            setTimeout(() => {
-                cameraPreview.style.display = "none"; // Hide the camera preview
-                resultDiv.innerHTML = `
-                    <p><strong>Scan Complete</strong></p>
-                    <p>AI Results: Grain is healthy, no weevils detected.</p>
-                `;
-            }, 5000); // Simulate a 5-second scan
-        });
     </script>
 </body>
 </html>
