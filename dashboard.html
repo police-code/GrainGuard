@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="dashboard.css">
     <title>Dashboard - GrainGuard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <style>
         .camera-preview {
             width: 100%;
@@ -46,6 +47,9 @@
 
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
+            <input type="file" id="upload-image" accept="image/*" onchange="processImage(event)">
+<canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
+
 
             <div class="grid">
                 <div class="card">
@@ -92,6 +96,60 @@
                 console.error(err);
             }
         });
+
+        let model;
+
+// Load the TensorFlow.js model
+async function loadModel() {
+    model = await tf.loadLayersModel('./model/model.json');
+    console.log("Model loaded successfully!");
+}
+
+loadModel();
+
+// Handle image upload
+document.getElementById('image-upload').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Create an image element
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+
+    img.onload = async () => {
+        // Preprocess the image
+        const tensor = preprocessImage(img);
+
+        // Make a prediction
+        const prediction = await model.predict(tensor).data();
+
+        // Display the result
+        displayResult(prediction[0]);
+    };
+});
+
+// Preprocess the image to match model input
+function preprocessImage(img) {
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 128;
+    canvas.height = 128;
+
+    // Draw the image onto the canvas
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas image to a tensor
+    return tf.browser.fromPixels(canvas)
+        .toFloat()
+        .div(255.0)
+        .expandDims(); // Add batch dimension
+}
+
+// Display the prediction result
+function displayResult(prediction) {
+    const resultText = prediction > 0.5 ? "Infested" : "Healthy";
+    document.getElementById('result').innerText = `Result: The grain is ${resultText}`;
+}
 
     </script>
 </body>
