@@ -46,7 +46,7 @@
 
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
-            <input type="file" id="upload-image" accept="image/*">
+            <input type="file" id="upload-image" accept="image/*" disabled>
             <canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
 
             <div class="grid">
@@ -87,8 +87,10 @@
                 try {
                     model = await tf.loadLayersModel('./model/model.json');
                     console.log("Model loaded successfully!");
+                    uploadInput.disabled = false;  // Enable the upload input once the model is loaded
                 } catch (error) {
                     console.error("Error loading model:", error);
+                    resultDiv.innerText = "Error loading model. Please try again later.";
                 }
             }
 
@@ -114,6 +116,12 @@
 
             // Handle image upload
             uploadInput.addEventListener('change', async (event) => {
+                if (!model) {
+                    console.error("Model not loaded yet.");
+                    resultDiv.innerText = "Error: Model is still loading. Please wait.";
+                    return;
+                }
+
                 const file = event.target.files[0];
                 if (!file) return;
 
@@ -123,11 +131,12 @@
                 img.onload = async () => {
                     const tensor = preprocessImage(img);
 
-                    if (model) {
+                    try {
                         const prediction = await model.predict(tensor).data();
                         displayResult(prediction[0]);
-                    } else {
-                        console.error("Model not loaded yet.");
+                    } catch (error) {
+                        console.error("Prediction error:", error);
+                        resultDiv.innerText = "Error: Could not process the image.";
                     }
 
                     // Clean up image resource
