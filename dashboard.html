@@ -40,16 +40,15 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <h1 id="welcome-message">Welcome</h1> <!-- Static welcome message -->
+            <h1 id="welcome-message">Welcome</h1>
             <div class="scan-option">
                 <button class="btn scan-btn" id="scan-button">Scan Now</button>
             </div>
 
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
-            <input type="file" id="upload-image" accept="image/*" onchange="processImage(event)">
-<canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
-
+            <input type="file" id="upload-image" accept="image/*">
+            <canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
 
             <div class="grid">
                 <div class="card">
@@ -76,81 +75,80 @@
     </footer>
 
     <script>
-        // Accessing the scan button and camera preview elements
-        const scanButton = document.getElementById('scan-button');
-        const cameraPreview = document.getElementById('camera-preview');
-        const resultDiv = document.getElementById('result');
+        document.addEventListener('DOMContentLoaded', () => {
+            const scanButton = document.getElementById('scan-button');
+            const cameraPreview = document.getElementById('camera-preview');
+            const resultDiv = document.getElementById('result');
+            const uploadInput = document.getElementById('upload-image');
+            const canvas = document.getElementById('canvas');
+            let model;
 
-        // Camera functionality
-        scanButton.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: "environment"
+            // Camera functionality
+            scanButton.addEventListener('click', async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" }
+                    });
+                    cameraPreview.srcObject = stream;
+                    cameraPreview.style.display = "block";
+                } catch (err) {
+                    alert("Unable to access the camera: " + err.message);
+                    console.error(err);
+                }
+            });
+
+            // Load TensorFlow.js model
+            async function loadModel() {
+                try {
+                    model = await tf.loadLayersModel('./model/model.json');
+                    console.log("Model loaded successfully!");
+                } catch (error) {
+                    console.error("Error loading model:", error);
+                }
+            }
+
+            loadModel();
+
+            // Handle image upload
+            uploadInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+
+                img.onload = async () => {
+                    const tensor = preprocessImage(img);
+
+                    if (model) {
+                        const prediction = await model.predict(tensor).data();
+                        displayResult(prediction[0]);
+                    } else {
+                        console.error("Model not loaded yet.");
                     }
-                });
-                cameraPreview.srcObject = stream;
-                cameraPreview.style.display = "block";
-            } catch (err) {
-                alert("Unable to access the camera: " + err.message);
-                console.error(err);
+                };
+            });
+
+            // Preprocess the image for the model
+            function preprocessImage(img) {
+                const ctx = canvas.getContext('2d');
+                canvas.width = 128;
+                canvas.height = 128;
+
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                return tf.browser.fromPixels(canvas)
+                    .toFloat()
+                    .div(255.0)
+                    .expandDims(); // Add batch dimension
+            }
+
+            // Display prediction result
+            function displayResult(prediction) {
+                const resultText = prediction > 0.5 ? "Infested" : "Healthy";
+                resultDiv.innerText = `Result: The grain is ${resultText}`;
             }
         });
-
-        let model;
-
-// Load the TensorFlow.js model
-async function loadModel() {
-    model = await tf.loadLayersModel('./model/model.json');
-    console.log("Model loaded successfully!");
-}
-
-loadModel();
-
-// Handle image upload
-document.getElementById('image-upload').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Create an image element
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-
-    img.onload = async () => {
-        // Preprocess the image
-        const tensor = preprocessImage(img);
-
-        // Make a prediction
-        const prediction = await model.predict(tensor).data();
-
-        // Display the result
-        displayResult(prediction[0]);
-    };
-});
-
-// Preprocess the image to match model input
-function preprocessImage(img) {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 128;
-    canvas.height = 128;
-
-    // Draw the image onto the canvas
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    // Convert the canvas image to a tensor
-    return tf.browser.fromPixels(canvas)
-        .toFloat()
-        .div(255.0)
-        .expandDims(); // Add batch dimension
-}
-
-// Display the prediction result
-function displayResult(prediction) {
-    const resultText = prediction > 0.5 ? "Infested" : "Healthy";
-    document.getElementById('result').innerText = `Result: The grain is ${resultText}`;
-}
-
     </script>
 </body>
 </html>
