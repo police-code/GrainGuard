@@ -85,7 +85,7 @@
             // Load TensorFlow.js model
             async function loadModel() {
                 try {
-                    model = await tf.loadLayersModel('./model/model.json');
+                    model = await tf.loadLayersModel('model/model.json');
                     console.log("Model loaded successfully!");
                     uploadInput.disabled = false;  // Enable the upload input once the model is loaded
                 } catch (error) {
