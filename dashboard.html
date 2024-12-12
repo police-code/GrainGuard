@@ -84,15 +84,19 @@
 
             // Load TensorFlow.js model
             async function loadModel() {
-                try {
-                    model = await tf.loadLayersModel('model/model.json');
-                    console.log("Model loaded successfully!");
-                    uploadInput.disabled = false;  // Enable the upload input once the model is loaded
-                } catch (error) {
-                    console.error("Error loading model:", error);
-                    resultDiv.innerText = "Error loading model. Please try again later.";
-                }
-            }
+    const modelUrl = "https://police-code.github.io/GrainGuard/model/model.json";
+    try {
+        const model = await tf.loadGraphModel(modelUrl);
+        console.log("Model loaded successfully");
+        return model;
+    } catch (error) {
+        console.error("Error loading model:", error);
+    }
+}
+
+// Call the function to load the model
+loadModel();
+
 
             // Preprocess the image for the model
             function preprocessImage(img) {
