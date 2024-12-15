@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <style>
-        .camera-preview {
+        .camera-preview, #canvas {
             width: 100%;
             height: auto;
             margin-top: 20px;
@@ -19,7 +19,7 @@
             font-size: 1.2em;
             text-align: center;
         }
-        .scan-button {
+        .scan-button, .upload-button {
             margin: 20px 0;
         }
     </style>
@@ -44,26 +44,22 @@
         <!-- Main Content -->
         <div class="main-content">
             <h1 id="welcome-message">Welcome</h1>
+            
+            <!-- Buttons for Upload and Camera -->
             <button id="scan-button" class="scan-button">Scan with Camera</button>
-            <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
-            <div id="result" class="result"></div>
-            <div class="grid">
-                <div class="card">
-                    <h3>Recent Scans</h3>
-                    <p>Here you can find your most recent grain scans.</p>
-                    <button class="btn">View Scans</button>
-                </div>
-                <div class="card">
-                    <h3>Alerts</h3>
-                    <p>No alerts at this time. Keep your grains safe!</p>
-                    <button class="btn">Check Alerts</button>
-                </div>
-                <div class="card">
-                    <h3>Statistics</h3>
-                    <p>Your grain health and moisture levels over time.</p>
-                    <button class="btn">View Statistics</button>
-                </div>
+            <div class="upload-option">
+                <label for="upload-image">Upload Image:</label>
+                <input type="file" id="upload-image" accept="image/*" class="upload-button">
             </div>
+            
+            <!-- Camera Preview -->
+            <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
+            
+            <!-- Canvas for Display -->
+            <canvas id="canvas"></canvas>
+            
+            <!-- Results -->
+            <div id="result" class="result"></div>
         </div>
     </div>
 
@@ -74,9 +70,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const scanButton = document.getElementById('scan-button');
+            const uploadInput = document.getElementById('upload-image');
             const cameraPreview = document.getElementById('camera-preview');
+            const canvas = document.getElementById('canvas');
             const resultDiv = document.getElementById('result');
+            const ctx = canvas.getContext('2d');
             let cocoSsdModel;
+            let videoStream;
 
             // Load COCO-SSD model
             async function loadCocoSsdModel() {
@@ -88,14 +88,9 @@
                 }
             }
 
-            // Detect objects using COCO-SSD
-            async function detectObjects(videoElement) {
-                if (!cocoSsdModel) {
-                    resultDiv.innerText = "Error: COCO-SSD model not loaded yet.";
-                    return;
-                }
-
-                const predictions = await cocoSsdModel.detect(videoElement);
+            // Process Image for Detection
+            async function processImage(imageElement) {
+                const predictions = await cocoSsdModel.detect(imageElement);
                 displayDetectionResults(predictions);
             }
 
@@ -106,7 +101,7 @@
                     resultDiv.innerText = "No pests detected in the grains.";
                 } else {
                     predictions.forEach(prediction => {
-                        const { class: detectedClass, score, bbox } = prediction;
+                        const { class: detectedClass, score } = prediction;
                         if (detectedClass === "insect" || detectedClass === "weevil") {
                             resultDiv.innerHTML += `<p>Pest Detected: ${detectedClass} (Confidence: ${(score * 100).toFixed(2)}%)</p>`;
                         } else {
@@ -116,22 +111,41 @@
                 }
             }
 
-            // Start camera and detection
+            // Handle Image Upload
+            uploadInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = async () => {
+                    canvas.style.display = "block";
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    await processImage(canvas);
+                };
+            });
+
+            // Start Camera for Detection
             async function startCamera() {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
+                    videoStream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: "environment" },
                     });
-                    cameraPreview.srcObject = stream;
+                    cameraPreview.srcObject = videoStream;
                     cameraPreview.style.display = "block";
 
                     // Run object detection at intervals
-                    const interval = setInterval(() => detectObjects(cameraPreview), 2000);
+                    const interval = setInterval(async () => {
+                        ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+                        await processImage(canvas);
+                    }, 2000);
 
                     // Stop camera after 15 seconds
                     setTimeout(() => {
                         clearInterval(interval);
-                        stream.getTracks().forEach(track => track.stop());
+                        videoStream.getTracks().forEach(track => track.stop());
                         cameraPreview.style.display = "none";
                         resultDiv.innerText += "\nCamera stopped.";
                     }, 15000);
@@ -141,7 +155,7 @@
                 }
             }
 
-            // Button event listener
+            // Camera Button Event Listener
             scanButton.addEventListener('click', startCamera);
 
             // Load the COCO-SSD model on page load
