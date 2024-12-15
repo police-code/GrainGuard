@@ -46,7 +46,7 @@
 
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
-            <input type="file" id="upload-image" accept="image/*" disabled>
+            <input type="file" id="upload-image" accept="image/*">
             <canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
 
             <div class="grid">
@@ -74,102 +74,95 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scanButton = document.getElementById('scan-button');
-            const cameraPreview = document.getElementById('camera-preview');
-            const resultDiv = document.getElementById('result');
-            const uploadInput = document.getElementById('upload-image');
+        let model; // Declare globally for access across functions
+
+        // Load TensorFlow.js model
+        async function loadModel() {
+            const modelUrl = "https://police-code.github.io/GrainGuard/model/model.json";
+            try {
+                model = await tf.loadGraphModel(modelUrl);
+                console.log("Model loaded successfully");
+            } catch (error) {
+                console.error("Error loading model:", error);
+                document.getElementById('result').innerText = "Error: Could not load the model.";
+            }
+        }
+
+        // Preprocess the image for the model
+        function preprocessImage(img) {
             const canvas = document.getElementById('canvas');
-            let model;
+            const ctx = canvas.getContext('2d');
+            canvas.width = 128;
+            canvas.height = 128;
 
-            // Load TensorFlow.js model
-            async function loadModel() {
-    const modelUrl = "https://police-code.github.io/GrainGuard/model/model.json";
-    try {
-        const model = await tf.loadGraphModel(modelUrl);
-        console.log("Model loaded successfully");
-        return model;
-    } catch (error) {
-        console.error("Error loading model:", error);
-    }
-}
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-// Call the function to load the model
-loadModel();
+            return tf.browser.fromPixels(canvas)
+                .toFloat()
+                .div(255.0)
+                .expandDims(); // Add batch dimension
+        }
 
+        // Display prediction result
+        function displayResult(prediction) {
+            const resultText = prediction > 0.5 ? "Infested" : "Healthy";
+            document.getElementById('result').innerText = `Result: The grain is ${resultText}`;
+        }
 
-            // Preprocess the image for the model
-            function preprocessImage(img) {
-                const ctx = canvas.getContext('2d');
-                canvas.width = 128;
-                canvas.height = 128;
-
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                return tf.browser.fromPixels(canvas)
-                    .toFloat()
-                    .div(255.0)
-                    .expandDims(); // Add batch dimension
+        // Handle image upload
+        document.getElementById('upload-image').addEventListener('change', async (event) => {
+            if (!model) {
+                console.error("Model not loaded yet.");
+                document.getElementById('result').innerText = "Error: Model is still loading. Please wait.";
+                return;
             }
 
-            // Display prediction result
-            function displayResult(prediction) {
-                const resultText = prediction > 0.5 ? "Infested" : "Healthy";
-                resultDiv.innerText = `Result: The grain is ${resultText}`;
-            }
+            const file = event.target.files[0];
+            if (!file) return;
 
-            // Handle image upload
-            uploadInput.addEventListener('change', async (event) => {
-                if (!model) {
-                    console.error("Model not loaded yet.");
-                    resultDiv.innerText = "Error: Model is still loading. Please wait.";
-                    return;
-                }
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
 
-                const file = event.target.files[0];
-                if (!file) return;
+            img.onload = async () => {
+                const tensor = preprocessImage(img);
 
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-
-                img.onload = async () => {
-                    const tensor = preprocessImage(img);
-
-                    try {
-                        const prediction = await model.predict(tensor).data();
-                        displayResult(prediction[0]);
-                    } catch (error) {
-                        console.error("Prediction error:", error);
-                        resultDiv.innerText = "Error: Could not process the image.";
-                    }
-
-                    // Clean up image resource
-                    URL.revokeObjectURL(img.src);
-                };
-            });
-
-            // Camera functionality
-            scanButton.addEventListener('click', async () => {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" }
-                    });
-                    cameraPreview.srcObject = stream;
-                    cameraPreview.style.display = "block";
-
-                    // Stop camera after 10 seconds for testing purposes
-                    setTimeout(() => {
-                        stream.getTracks().forEach(track => track.stop());
-                        cameraPreview.style.display = "none";
-                    }, 10000);
-                } catch (err) {
-                    alert("Unable to access the camera: " + err.message);
-                    console.error(err);
+                    const prediction = await model.predict(tensor).data();
+                    displayResult(prediction[0]);
+                } catch (error) {
+                    console.error("Prediction error:", error);
+                    document.getElementById('result').innerText = "Error: Could not process the image.";
                 }
-            });
 
-            loadModel();
+                // Clean up image resource
+                URL.revokeObjectURL(img.src);
+            };
         });
+
+        // Camera functionality
+        document.getElementById('scan-button').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                const cameraPreview = document.getElementById('camera-preview');
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = "block";
+
+                // Notify the user when the camera stops
+                setTimeout(() => {
+                    stream.getTracks().forEach(track => track.stop());
+                    cameraPreview.style.display = "none";
+                    alert("Camera preview has ended.");
+                }, 10000);
+            } catch (err) {
+                alert("Unable to access the camera: " + err.message);
+                console.error(err);
+            }
+        });
+
+        // Initialize model loading on page load
+        window.onload = loadModel;
     </script>
 </body>
 </html>
