@@ -11,13 +11,16 @@
         .camera-preview {
             width: 100%;
             height: auto;
-            display: none;
             margin-top: 20px;
+            display: none;
         }
         .result {
             margin-top: 20px;
             font-size: 1.2em;
             text-align: center;
+        }
+        .scan-button {
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -31,7 +34,6 @@
                 <li><a href="scan-history.html">Scan History</a></li>
                 <li><a href="alerts.html">Alerts</a></li>
                 <li><a href="tips.html">Post-Harvest Handling Tips</a></li>
-                <li><a href="batch-tracking.html">Batch Tracking</a></li>
                 <li><a href="profile.html">Profile</a></li>
                 <li><a href="settings.html">Settings</a></li>
                 <li><a href="logout.html">Logout</a></li>
@@ -40,32 +42,10 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <h1 id="welcome-message">Welcome</h1>
-            <div class="scan-option">
-                <button class="btn scan-btn" id="scan-button">Scan Now</button>
-            </div>
-
+            <h1 id="welcome-message">Welcome to GrainGuard</h1>
+            <button id="scan-button" class="scan-button">Scan with Camera</button>
             <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
             <div id="result" class="result"></div>
-            <canvas id="canvas" width="128" height="128" style="display:none;"></canvas>
-
-            <div class="grid">
-                <div class="card">
-                    <h3>Recent Scans</h3>
-                    <p>Here you can find your most recent grain scans.</p>
-                    <button class="btn">View Scans</button>
-                </div>
-                <div class="card">
-                    <h3>Alerts</h3>
-                    <p>No alerts at this time. Keep your grains safe!</p>
-                    <button class="btn">Check Alerts</button>
-                </div>
-                <div class="card">
-                    <h3>Statistics</h3>
-                    <p>Your grain health and moisture levels over time.</p>
-                    <button class="btn">View Statistics</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -74,25 +54,11 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const scanButton = document.getElementById('scan-button');
             const cameraPreview = document.getElementById('camera-preview');
             const resultDiv = document.getElementById('result');
-            const canvas = document.getElementById('canvas');
-            let model;
             let cocoSsdModel;
-
-            // Load TensorFlow.js model
-            async function loadGrainModel() {
-                const modelUrl = "https://police-code.github.io/GrainGuard/model/model.json";
-                try {
-                    const model = await tf.loadGraphModel(modelUrl);
-                    console.log("Grain Model loaded successfully");
-                    return model;
-                } catch (error) {
-                    console.error("Error loading Grain Model:", error);
-                }
-            }
 
             // Load COCO-SSD model
             async function loadCocoSsdModel() {
@@ -104,109 +70,64 @@
                 }
             }
 
-            // Preprocess the image for the grain model
-            function preprocessImage(img) {
-                const ctx = canvas.getContext('2d');
-                canvas.width = 128;
-                canvas.height = 128;
-
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                return tf.browser.fromPixels(canvas)
-                    .toFloat()
-                    .div(255.0)
-                    .expandDims(); // Add batch dimension
-            }
-
-            // Display prediction result for grain model
-            function displayGrainResult(prediction) {
-                const resultText = prediction > 0.5 ? "Infested" : "Healthy";
-                resultDiv.innerText = `Grain Model Result: The grain is ${resultText}`;
-            }
-
-            // Analyze using COCO-SSD
-            async function analyzeWithCocoSsd(image) {
+            // Detect objects using COCO-SSD
+            async function detectObjects(videoElement) {
                 if (!cocoSsdModel) {
-                    console.error("COCO-SSD Model not loaded yet.");
-                    resultDiv.innerText = "Error: COCO-SSD model is still loading. Please wait.";
+                    resultDiv.innerText = "Error: COCO-SSD model not loaded yet.";
                     return;
                 }
 
-                const predictions = await cocoSsdModel.detect(image);
-                predictions.forEach(prediction => {
-                    console.log(`Detected: ${prediction.class}, Score: ${prediction.score}`);
-                });
+                const predictions = await cocoSsdModel.detect(videoElement);
+                displayDetectionResults(predictions);
+            }
 
+            // Display detection results
+            function displayDetectionResults(predictions) {
+                resultDiv.innerHTML = ""; // Clear previous results
                 if (predictions.length === 0) {
-                    resultDiv.innerText += "\nCOCO-SSD Result: No pests detected.";
+                    resultDiv.innerText = "No pests detected in the grains.";
                 } else {
-                    const pestPredictions = predictions.filter(pred => pred.class === "insect" || pred.class === "weevil");
-                    if (pestPredictions.length > 0) {
-                        resultDiv.innerText += `\nCOCO-SSD Result: Pests detected!`;
-                    } else {
-                        resultDiv.innerText += `\nCOCO-SSD Result: No specific pests detected.`;
-                    }
+                    predictions.forEach(prediction => {
+                        const { class: detectedClass, score, bbox } = prediction;
+                        if (detectedClass === "insect" || detectedClass === "weevil") {
+                            resultDiv.innerHTML += `<p>Pest Detected: ${detectedClass} (Confidence: ${(score * 100).toFixed(2)}%)</p>`;
+                        } else {
+                            resultDiv.innerHTML += `<p>Detected: ${detectedClass} (Confidence: ${(score * 100).toFixed(2)}%)</p>`;
+                        }
+                    });
                 }
             }
 
-            // Handle image upload
-            const uploadInput = document.getElementById('upload-image');
-            uploadInput.addEventListener('change', async (event) => {
-                if (!model || !cocoSsdModel) {
-                    console.error("Models not loaded yet.");
-                    resultDiv.innerText = "Error: Models are still loading. Please wait.";
-                    return;
-                }
-
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-
-                img.onload = async () => {
-                    const tensor = preprocessImage(img);
-
-                    try {
-                        // Grain model prediction
-                        const prediction = await model.predict(tensor).data();
-                        displayGrainResult(prediction[0]);
-
-                        // COCO-SSD analysis
-                        await analyzeWithCocoSsd(img);
-                    } catch (error) {
-                        console.error("Prediction error:", error);
-                        resultDiv.innerText = "Error: Could not process the image.";
-                    }
-
-                    // Clean up image resource
-                    URL.revokeObjectURL(img.src);
-                };
-            });
-
-            // Camera functionality
-            scanButton.addEventListener('click', async () => {
+            // Start camera and detection
+            async function startCamera() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" }
+                        video: { facingMode: "environment" },
                     });
                     cameraPreview.srcObject = stream;
                     cameraPreview.style.display = "block";
 
-                    // Stop camera after 10 seconds for testing purposes
+                    // Run object detection at intervals
+                    const interval = setInterval(() => detectObjects(cameraPreview), 2000);
+
+                    // Stop camera after 15 seconds
                     setTimeout(() => {
+                        clearInterval(interval);
                         stream.getTracks().forEach(track => track.stop());
                         cameraPreview.style.display = "none";
-                    }, 10000);
+                        resultDiv.innerText += "\nCamera stopped.";
+                    }, 15000);
                 } catch (err) {
-                    alert("Unable to access the camera: " + err.message);
-                    console.error(err);
+                    console.error("Error accessing camera:", err);
+                    alert("Could not access camera: " + err.message);
                 }
-            });
+            }
 
-            // Load models
-            loadGrainModel().then(loadedModel => model = loadedModel);
-            loadCocoSsdModel();
+            // Button event listener
+            scanButton.addEventListener('click', startCamera);
+
+            // Load the COCO-SSD model on page load
+            await loadCocoSsdModel();
         });
     </script>
 </body>
